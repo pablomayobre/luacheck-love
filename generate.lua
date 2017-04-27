@@ -2,6 +2,8 @@ local TAB = "  "
 local OUTPUT_FILE = "love_standard.lua"
 
 local function addHeader(output)
+  table.insert(output, "local empty, read_write = {}, { read_only = false }")
+  table.insert(output, "")
   table.insert(output, "local love = {")
   table.insert(output, TAB .. "read_only = true,")
   table.insert(output, TAB .. "fields = {")
@@ -10,13 +12,13 @@ end
 
 local function addFunctions (output, indent, functions)
   for _, f in pairs(functions) do
-    table.insert(output, indent .. f.name .. " = {},")
+    table.insert(output, indent .. f.name .. " = empty,")
   end
 end
 
 local function addCallbacks (output, indent, functions)
   for _, f in pairs(functions) do
-    table.insert(output, indent .. f.name .. " = { read_only = false },")
+    table.insert(output, indent .. f.name .. " = read_write,")
   end
 end
 

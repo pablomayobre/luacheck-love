@@ -1,12 +1,30 @@
-local TAB = "  "
+local TAB = "   "
 local OUTPUT_FILE = "love_standard.lua"
+local MAX_LINE_LENGTH = 100
 
 local function addHeader(output)
-  table.insert(output, "local empty, read_write = {}, { read_only = false }")
-  table.insert(output, "")
-  table.insert(output, "local love = {")
-  table.insert(output, TAB .. "read_only = true,")
-  table.insert(output, TAB .. "fields = {")
+  local temp = {
+    "local empty, read_write = {}, { read_only = false }",
+    "",
+    "local function def_fields(...)",
+    TAB .. "local fields = {}",
+    "",
+    TAB .. "for _, field in ipairs({...}) do",
+    TAB .. TAB .. "fields[field] = empty",
+    TAB .. "end",
+    "",
+    TAB .. "return {fields = fields}",
+    "end",
+    "",
+    "local love = {",
+    TAB .. "read_only = true,",
+    TAB .. "fields = {"
+  }
+
+  for _, v in ipairs(temp) do
+    table.insert(output, v)
+  end
+
   return (TAB):rep(2)
 end
 
@@ -22,20 +40,48 @@ local function addCallbacks (output, indent, functions)
   end
 end
 
-local function addModules (output, indent, modules)
-  for _, m in pairs(modules) do
-    table.insert(output, indent .. m.name .. " = {")
-    table.insert(output, indent .. TAB .. "fields = {")
+local function getFields (functions, indent, str)
+  local fields = {}
+  str = indent .. str
 
-    addFunctions(output, indent .. TAB:rep(2), m.functions)
+  for i=1, #functions, 1 do
 
-    table.insert(output, indent .. TAB .. "},")
-    table.insert(output, indent .. "},")
+    local name = '"'..functions[i].name .. '",'
+
+    if #(str .. name) > MAX_LINE_LENGTH then
+      table.insert(fields, str)
+      str = indent .. TAB .. name
+    else
+      str = str .. name
+    end
   end
+
+  table.insert(fields, str)
+  fields[#fields] = fields[#fields]:sub(1, -2) .. "),"
+
+  return fields
+end
+
+local function addModules (output, indent, modules)
+  table.insert(output, "")
+
+  for _, m in pairs(modules) do
+    local fields = getFields(m.functions, indent, m.name .. " = def_fields(")
+
+    for i=1, #fields do
+      table.insert(output, fields[i])
+    end
+
+    table.insert(output, "")
+  end
+
+  output[#output] = nil
 end
 
 local function addFooter (output)
-  table.insert(output, TAB .. "},")
+  output[#output] = output[#output]:sub(1, -2)
+
+  table.insert(output, TAB .. "}")
   table.insert(output, "}")
   table.insert(output, "")
   table.insert(output, "return love")
@@ -49,6 +95,7 @@ local function createTable (api)
 
   addFunctions(output, indent, api.functions)
   addCallbacks(output, indent, api.callbacks)
+
   addModules  (output, indent, api.modules  )
 
   addFooter(output)

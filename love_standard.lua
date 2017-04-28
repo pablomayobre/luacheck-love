@@ -11,7 +11,6 @@ local function def_fields(...)
 end
 
 local love = {
-   read_only = true,
    fields = {
       getVersion = empty,
       conf = read_write,
@@ -120,4 +119,6 @@ local love = {
    }
 }
 
-return love
+return {
+   fields = { read_globals = love }
+}

@@ -3,7 +3,7 @@ local OUTPUT_FILE = "love_standard.lua"
 local MAX_LINE_LENGTH = 100
 
 local function addHeader(output)
-  local temp = {
+  local HEADER = {
     "local empty, read_write = {}, { read_only = false }",
     "",
     "local function def_fields(...)",
@@ -17,11 +17,11 @@ local function addHeader(output)
     "end",
     "",
     "local love = {",
-    TAB .. "read_only = true,",
+    --TAB .. "read_only = true,",
     TAB .. "fields = {"
   }
 
-  for _, v in ipairs(temp) do
+  for _, v in ipairs(HEADER) do
     table.insert(output, v)
   end
 
@@ -81,10 +81,18 @@ end
 local function addFooter (output)
   output[#output] = output[#output]:sub(1, -2)
 
-  table.insert(output, TAB .. "}")
-  table.insert(output, "}")
-  table.insert(output, "")
-  table.insert(output, "return love")
+  local FOOTER = {
+    TAB .. "}",
+    "}",
+    "",
+    "return {",
+    TAB .. "fields = { read_globals = love }",
+    "}",
+  }
+
+  for _, v in ipairs(FOOTER) do
+    table.insert(output, v)
+  end
 end
 
 

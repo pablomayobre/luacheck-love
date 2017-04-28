@@ -90,7 +90,7 @@ local function addFooter (output)
     "}",
     "",
     "return {",
-    TAB .. "fields = { " .. ((MODE == "add") and "read_globals" or "fields") .. " = love }",
+    TAB .. ((MODE == "add") and "read_globals" or "fields") .. " = { love = love }",
     "}",
   }
 

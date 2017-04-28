@@ -120,5 +120,5 @@ local love = {
 }
 
 return {
-   fields = { read_globals = love }
+   read_globals = { love = love }
 }

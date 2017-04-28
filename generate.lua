@@ -1,6 +1,7 @@
 local TAB = "   "
 local OUTPUT_FILE = "love_standard.lua"
 local MAX_LINE_LENGTH = 100
+local MODE = "add" --"luajit"
 
 local function addHeader(output)
   local HEADER = {
@@ -17,9 +18,12 @@ local function addHeader(output)
     "end",
     "",
     "local love = {",
-    --TAB .. "read_only = true,",
     TAB .. "fields = {"
   }
+
+  if MODE == "luajit" then
+    table.insert(HEADER, 14, TAB .. "read_only = true,")
+  end
 
   for _, v in ipairs(HEADER) do
     table.insert(output, v)
@@ -86,7 +90,7 @@ local function addFooter (output)
     "}",
     "",
     "return {",
-    TAB .. "fields = { read_globals = love }",
+    TAB .. "fields = { " .. ((MODE == "add") and "read_globals" or "fields") .. " = love }",
     "}",
   }
 
